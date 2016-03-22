@@ -1,0 +1,7 @@
+---
+- hosts: local
+  user: root
+  sudo: yes
+  
+  tasks:
+  - shell: shutdown now

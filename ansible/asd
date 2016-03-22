@@ -1,0 +1,2 @@
+- name: Add hosts
+    lineinfile: dest=/etc/hosts regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="192.168.68.128 emr1"

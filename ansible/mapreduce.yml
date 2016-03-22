@@ -1,0 +1,27 @@
+---
+- hosts: webservers
+  user: root
+  sudo: yes
+  vars:
+    Word_count: /home/hadoop/hadoop/WordCount
+  tasks:
+  - name: Input folder
+    file: path=/home/hadoop/hadoop-2.6.0/input state=directory mode=0755
+  - shell: chown -R hadoop:hadoop /home/hadoop/
+  - file: path=/home/hadoop/hadoop state=directory mode=0755
+  - copy: src=/home/EMR/ansible/k1.txt dest=/home/hadoop/hadoop-2.6.0/input/. 
+  - copy: src=/home/EMR/ansible/WordCount.java dest=/home/hadoop/.
+  - shell: su - hadoop -c " /home/hadoop/hadoop-2.6.0/bin/hadoop com.sun.tools.javac.Main WordCount.java"
+  - shell: su - hadoop -c " jar cf WordCount.jar WordCount*.class"
+  - shell: su - hadoop -c "chmod -R 777 /home/hadoop/WordCount.jar"
+  - name: output folder
+    file: path=/home/hadoop/hadoop-2.6.0/output state=directory mode=0755
+  - name: Hadoop file system folder
+    shell: su - hadoop -c " /home/hadoop/hadoop-2.6.0/bin/hadoop fs -mkdir -p input"
+  - shell: su - hadoop -c " /home/hadoop/hadoop-2.6.0/bin/hadoop fs -put /home/hadoop/hadoop-2.6.0/input/k1.txt input"
+    ignore_errors: yes
+  - name: Mapreduce Begins
+    shell: su - hadoop -c "/home/hadoop/hadoop-2.6.0/bin/hadoop jar WordCount.jar WordCount input/k1.txt output"
+  - shell: chown -R hadoop:hadoop /home/hadoop/
+  - name: output
+    shell: su - hadoop -c "/home/hadoop/hadoop-2.6.0/bin/hadoop fs -getmerge /user/hadoop/output/part-r-00000 /home/hadoop/output/k.txt"

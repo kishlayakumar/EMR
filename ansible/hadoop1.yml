@@ -1,0 +1,37 @@
+---
+- hosts: local
+  user: root
+  sudo: yes
+  
+  tasks:
+  - name: Download Hadoop
+    copy: src=/home/EMR/ansible/ansible-repo/hadoop-2.6.0.tar.gz  dest=/home/EMR/.
+  - name: Unpack
+    command: "tar xzf /home/EMR/hadoop-2.6.0.tar.gz"
+  - command: rm -rf /home/hadoop/hadoop-2.6.0
+  - name: move to folder
+    command: "mv  hadoop-2.6.0 /home/hadoop"
+  - name: Edit barc
+    lineinfile: dest=/home/hadoop/.bashrc regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="export HADOOP_HOME=/home/hadoop/hadoop-2.6.0"
+  - lineinfile: dest=/home/hadoop/.bashrc regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="export HADOOP_INSTALL=$HADOOP_HOME"
+  - lineinfile: dest=/home/hadoop/.bashrc regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="export HADOOP_MAPRED_HOME=$HADOOP_HOME"
+  - lineinfile: dest=/home/hadoop/.bashrc regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="export HADOOP_COMMON_HOME=$HADOOP_HOME"
+  - lineinfile: dest=/home/hadoop/.bashrc regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="export HADOOP_HDFS_HOME=$HADOOP_HOME"
+  - lineinfile: dest=/home/hadoop/.bashrc regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="export YARN_HOME=$HADOOP_HOME"
+  - lineinfile: dest=/home/hadoop/.bashrc regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="export HADOOP_COMMON_LIB_NATIVE_DIR=$HADOOP_HOME/lib/native"
+  - lineinfile: dest=/home/hadoop/.bashrc regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="export PATH=$PATH:$HADOOP_HOME/sbin:$HADOOP_HOME/bin"
+  
+  - name: Appling changes in current run enviroment
+    action: shell source /home/hadoop/.bashrc
+ 
+
+  - name: Export Java home
+    lineinfile: dest=/home/hadoop/hadoop-2.6.0/etc/hadoop/hadoop-env.sh regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="export JAVA_HOME=/usr/java/jdk1.8.0_40/"
+  - name: Edit core site
+    lineinfile: dest=/home/hadoop/hadoop-2.6.0/etc/hadoop/core-site.xml regexp="^\[\[ -s \\$HOME/\.pythonbrew" insertafter="<configuration>"     line="<property><name>fs.default.name</name><value>hdfs://localhost:9000</value></property>"
+  - name: Edit HDFS site
+    lineinfile: dest=/home/hadoop/hadoop-2.6.0/etc/hadoop/core-site.xml regexp="^\[\[ -s \\$HOME/\.pythonbrew" insertafter="<configuration>" line="<property><name>dfs.replication</name><value>1</value></property><property><name>dfs.name.dir</name><value>file:///home/hadoop/hadoop-2.6.0/hadoopdata/hdfs/namenode<value></property><property><name>dfs.data.dir</name><value>file:///home/hadoop/hadoop-2.6.0/hadoopdata/hdfs/datanode</value></property>"
+  - name: edit mapred-site.xml
+    lineinfile: dest=/home/hadoop/hadoop-2.6.0/etc/hadoop/mapred-site.xml.template regexp="^\[\[ -s \\$HOME/\.pythonbrew" insertafter="<configuration>" line="<property><name>mapreduce.framework.name</name><value>yarn</value></property>"
+  - name: Edit yarn-site.xml
+    lineinfile: dest=/home/hadoop/hadoop-2.6.0/etc/hadoop/yarn-site.xml regexp="^\[\[ -s \\$HOME/\.pythonbrew" insertafter="<configuration>" line="<property><name>yarn.nodemanager.aux-services</name><value>mapreduce_shuffle</value></property>"

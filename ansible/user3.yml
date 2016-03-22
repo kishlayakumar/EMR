@@ -1,0 +1,18 @@
+---
+- hosts: local
+  user: root
+  sudo: yes
+  vars: 
+    hadoop_home: /home/hadoop/hadoop-2.6.0
+  tasks:
+  - name: Download expect
+    copy: src=/home/EMR/ansible/ansible-repo/expect-5.45-12.el7.x86_64.rpm  dest=/home/hadoop/.
+  #- name: Install expect
+   # yum: name=/home/hadoop/expect-5.45-12.el7.x86_64.rpm
+  - name: Download ssh pass
+    copy: src=/home/EMR/ansible/ansible-repo/sshpass-1.05-1.el6.x86_64.rpm  dest=/home/hadoop/.
+  - name: Install sshpass
+    yum: name=/home/hadoop/sshpass-1.05-1.el6.x86_64.rpm
+  - name: authorizing user hadoop
+    raw: "sshpass -p hadoop@123 ssh hadoop@localhost"
+    ignore_errors: yes

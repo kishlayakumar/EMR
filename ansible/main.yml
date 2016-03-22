@@ -1,0 +1,10 @@
+---
+- hosts: webservers
+
+  tasks:
+  
+  - name: install java
+    command: "ansible-playbook /home/EMR/ansible/java3.yml"
+
+  - name: install Hadoop
+    command: "ansible-playbook /home/EMR/ansible/hadooptemp.yml"

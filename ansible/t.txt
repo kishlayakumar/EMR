@@ -1,0 +1,4 @@
+ - command: "hdfs namenode -format"
+  - command: "cd /home/hadoop/hadoop-2.6.0/sbin/"
+  - command: "start-dfs.sh" 
+  - command: "start-yarn.sh"

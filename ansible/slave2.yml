@@ -1,0 +1,62 @@
+---
+- hosts: local1
+  user: root
+  sudo: yes
+  vars: 
+    hadoop_home: /home/hadoop/hadoop-2.6.0
+  tasks:
+
+  - name: Edit host file
+    lineinfile: dest=/etc/hosts regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="11.11.3.194 master"
+  - name: Edit host file
+    lineinfile: dest=/etc/hosts regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="11.11.3.191 slave"
+  - name: Configuring Key Based Login
+    shell: su - hadoop -c "ssh-copy-id -i /home/hadoop/.ssh/id_rsa.pub hadoop@master" 
+  - shell: su - hadoop -c "ssh-copy-id -i /home/hadoop/.ssh/id_rsa.pub hadoop@slave"
+    ignore_errors: yes 
+  - shell: su hadoop -c "chmod 0600 /home/hadoop/.ssh/authorized_keys"
+
+  - lineinfile: dest= /etc/hostname regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="master"
+    ignore_errors: yes
+
+  - name: Delete Hadoop Folder
+    shell: rm -rf /home/hadoop/hadoop-2.6.0
+    ignore_errors: yes
+  - name: Download Hadoop
+    unarchive: src=/home/EMR/ansible/ansible-repo/hadoop-2.6.0.tar.gz dest=/home/hadoop/.
+  - shell: chown -R hadoop /home/hadoop
+
+  - name: Edit core site
+    lineinfile: dest=/home/hadoop/hadoop-2.6.0/etc/hadoop/core-site.xml regexp="^\[\[ -s \\$HOME/\.pythonbrew" insertafter="<configuration>" line="<property><name>fs.default.name</name><value>hdfs://master:9000</value></property>"
+  
+  - name: Edit HDFS site
+    lineinfile: dest=/home/hadoop/hadoop-2.6.0/etc/hadoop/hdfs-site.xml regexp="^\[\[ -s \\$HOME/\.pythonbrew" insertafter="<configuration>" line="<property><name>dfs.replication</name><value>2</value></property><property><name>dfs.namenode.name.dir</name><value>file:/home/hadoop/hadoop-2.6.0/hadoopdata/hdfs/namenode</value></property><property><name>dfs.namenode.name.dir</name><value>file:/home/hadoop/hadoop-2.6.0/hadoopdata/hdfs/namenode</value></property><property><name>dfs.replication</name><value>2</value></property><property><name>dfs.datanode.name.dir</name><value>file:/home/hadoop/hadoop-2.6.0/hadoopdata/hdfs/datanode</value></property>"
+  
+  - name: edit mapred-site.xml
+    lineinfile: dest=/home/hadoop/hadoop-2.6.0/etc/hadoop/mapred-site.xml.template regexp="^\[\[ -s \\$HOME/\.pythonbrew" insertafter="<configuration>" line="<property><name>mapred.job.tracker</name><value>master:54311</value></property>"
+  
+  - name: Edit yarn-site.xml
+    lineinfile: dest=/home/hadoop/hadoop-2.6.0/etc/hadoop/yarn-site.xml regexp="^\[\[ -s \\$HOME/\.pythonbrew" insertafter="<configuration>" line=" <property><name>yarn.nodemanager.aux-services</name><value>mapreduce_shuffle</value></property><property><name>yarn.nodemanager.aux-services.mapreduce.shuffle.class</name><value>org.apache.hadoop.mapred.ShuffleHandler</value></property><property><name>yarn.resourcemanager.resource-tracker.address</name><value>master:8025</value></property><property><name>yarn.resourcemanager.scheduler.address</name><value>master:8030</value></property><property><name>yarn.resourcemanager.address</name><value>master:8050</value></property>"
+
+  - name: Export Java home
+    lineinfile: dest=/home/hadoop/hadoop-2.6.0/etc/hadoop/hadoop-env.sh regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="export JAVA_HOME=/usr/java/jdk1.8.0_40"
+  - lineinfile: dest=/home/hadoop/hadoop-2.6.0/etc/hadoop/hadoop-env.sh regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="export HADOOP_OPTS=-Djava.net.preferIPv4Stack=true"
+  - lineinfile: dest=/home/hadoop/hadoop-2.6.0/etc/hadoop/hadoop-env.sh regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="export HADOOP_CONF_DIR=/home/hadoop/hadoop-2.6.0/etc/hadoop"
+  - shell: mkdir -p /app/hadoop/tmp
+  - shell: chown -R hadoop:hadoop /app/hadoop/tmp
+  
+  - shell: ansible-playbook /home/EMR/ansible/slave.yml
+
+  - name: Configure Hadoop on Master Server Only
+    lineinfile: dest=/home/hadoop/hadoop-2.6.0/etc/hadoop/slaves regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="master"
+
+    lineinfile: dest=/home/hadoop/hadoop-2.6.0/etc/hadoop/slaves regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="slave"
+
+  - shell: rm -Rf /app/hadoop/tmp/*
+
+  - shell: chown -R hadoop:hadoop /home/hadoop/hadoop-2.6.0
+
+  - shell: su - hadoop -c "hdfs namenode -format -force"
+
+  - shell: su - hadoop -c "start-all.sh"
+    ignore_errors: yes 

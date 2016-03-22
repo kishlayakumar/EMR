@@ -1,0 +1,5 @@
+#!/usr/bin/expect
+spawn su hadoop
+expect "Passowrd:"
+send  "hadoop"
+interact

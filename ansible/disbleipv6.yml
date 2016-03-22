@@ -1,0 +1,14 @@
+---
+- hosts: local
+  user: root
+  sudo: yes
+  vars: 
+    hadoop_home: /home/hadoop/hadoop-2.6.0
+  tasks:
+ # - ufw: state=enabled policy=allow
+ # - ufw: rule=allow name=OpenSSH
+  - name: disabling IPV6
+    lineinfile: dest=/etc/sysctl.conf regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="net.ipv6.conf.default.disable_ipv6 = 1"
+  - lineinfile: dest=/etc/sysctl.conf regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="net.ipv6.conf.all.disable_ipv6 = 1"
+  - shell: service network restart
+  

@@ -1,0 +1,17 @@
+---
+- hosts: webservers
+  sudo: True
+  vars:
+    keyfile: /tmp/known_hosts
+    user: hadoop
+  tasks:
+  - name: copy into place
+    copy: src={{keyfile}} dest=/etc/ssh/ssh_known_host
+  - name: Set StrictHostKeyChecking no in ~/.ssh/config
+    lineinfile: create=yes dest="/home/{{user}}/.ssh/config"
+                  regexp=StrictHostKeyChecking
+                  line="StrictHostKeyChecking no"
+                  owner={{user}}
+                  group={{user}}
+                  mode=0644
+

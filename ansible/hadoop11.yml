@@ -1,0 +1,11 @@
+---
+- hosts: local
+  user: root
+  sudo: yes
+  vars: 
+    hadoop_home: /home/hadoop/hadoop-2.6.0
+  tasks:
+  - name: Download Hadoop
+    unarchive: src=/home/EMR/ansible/ansible-repo/hadoop-2.6.0.tar.gz dest=/home/hadoop/.
+ 
+

@@ -1,0 +1,18 @@
+- hosts: local
+  sudo: yes
+  vars:
+    download_url: ssh://root@192.168.68.128/home/emr1/jdk-8u40-linux-x64.rpm
+    download_folder: /etc
+    java_name: "{{download_folder}}/jdk1.8.40"
+    java_archive: "{{download_folder}}/jdk-8u40-linux-x64.rpm"
+ 
+ 
+  tasks:
+  - name: Download Java
+    command: "wget -q -O {{java_archive}} --no-check-certificate --no-cookies --header 'Cookie: oraclelicense=accept-securebackup-cookie' {{download_url}} creates={{java_archive}}"
+
+  
+ 
+ 
+ 
+ 

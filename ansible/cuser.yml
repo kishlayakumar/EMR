@@ -1,0 +1,26 @@
+---
+- hosts: local
+  user: root
+  vars: 
+    createuser: 'hadoop'
+    createpassword: 'hadoop@123'
+  tasks:
+  - name: Setup | create user
+   # command: useradd {{ createuser }}
+    user: name={{ createuser }} generate_ssh_key=yes ssh_key_bits=2048 ssh_key_file=.ssh/id_rsa
+    ignore_errors: yes
+
+    sudo: true
+ 
+  - name: Setup | set user password
+    shell: usermod -p $(echo '{{ createpassword }}' | openssl passwd -1 -stdin) {{ createuser }}
+    sudo: true
+ 
+ #- name: Generate SSH keys for vagrant user
+ # - user: name=hadoop generate_ssh_key=yes ssh_key_bits=2048 ssh_key_file=.ssh/id_rsa
+
+
+  #- name: Show SSH public key
+  # raw: cat /home/hadoop/.ssh/id_rsa.pub | ssh hadoop@localhost "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
+ 
+  #- command: "sshpass -p hadoop@123  ssh hadoop@192.168.68.128"                  

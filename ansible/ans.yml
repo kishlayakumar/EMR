@@ -1,0 +1,7 @@
+- hosts: local
+  user: hadoop
+  sudo: yes
+
+  tasks:
+  - name: Su Hadoop
+    shell: su hadoop

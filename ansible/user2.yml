@@ -1,0 +1,11 @@
+---
+- hosts: local
+  user: root
+  tasks:
+  - name: keygen
+    command: "ssh-keygen -t rsa"
+    script: su.sh
+  
+  - name: adding user
+    command: "cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys"
+    

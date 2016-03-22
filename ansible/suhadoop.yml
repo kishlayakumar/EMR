@@ -1,0 +1,8 @@
+---
+- hosts: local
+  user: root
+  sudo: yes
+
+  tasks:
+  - name: Su Hadoop
+    script: /home/EMR/ansible/su.expect

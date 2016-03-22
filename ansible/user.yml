@@ -1,0 +1,8 @@
+---
+- hosts: local
+  gather_facts: False
+  su: yes
+  su_user: hadoop
+  tasks:
+    - shell: whoami
+    

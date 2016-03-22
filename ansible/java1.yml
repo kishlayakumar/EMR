@@ -1,0 +1,31 @@
+- hosts: local
+
+ 
+ 
+  tasks:
+  - name: Download JDK
+    copy: src=/home/EMR/ansible/ansible-repo/jdk-8u40-linux-x64.rpm  dest=/home/EMR/.
+  - name: Install JDK
+    yum: name=/home/EMR/jdk-8u40-linux-x64.rpm    
+  - name: Download JRE
+    copy: src=/home/EMR/ansible/ansible-repo/jre-8u40-linux-x64.rpm  dest=/home/EMR/.
+  - name: Install JRE
+    yum: name=/home/EMR/jre-8u40-linux-x64.rpm
+
+
+  - name: Install path java
+    command: "alternatives --install /usr/bin/java java /usr/java/jdk1.8.0_40/jre/bin/java 20000"
+  - name: Install Path JAR
+    command: "alternatives --install /usr/bin/jar jar /usr/java/jdk1.8.0_40/bin/jar 20000"
+  - name: Install Path JAVAC
+    command: "alternatives --install /usr/bin/javac javac /usr/java/jdk1.8.0_25/bin/javac 20000"
+
+
+  - name: set path java
+    command: "alternatives --set java /usr/java/jdk1.8.0_40/jre/bin/java"
+  
+  - name: set path javac
+    command: "alternatives --set javac /usr/java/jdk1.8.0_40/bin/javac"
+  
+ 
+ 

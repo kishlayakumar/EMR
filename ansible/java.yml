@@ -1,0 +1,10 @@
+- hosts: local
+
+  tasks:
+    - name: Install JDK
+      yum: pkg=java-1.7.0-openjdk
+
+    - name: Install JRE
+      yum: pkg=java-1.7.0-openjdk-devel
+
+

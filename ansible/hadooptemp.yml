@@ -1,0 +1,60 @@
+---
+- hosts: webservers
+  user: root
+  sudo: yes
+  vars: 
+    hadoop_home: /home/hadoop/hadoop-2.6.0
+  tasks:
+
+  - name: Edit host file
+    lineinfile: dest=/etc/hosts regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="11.11.3.194 master"
+ 
+  - lineinfile: dest=/etc/hosts regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="11.11.3.200 slave1"
+  - lineinfile: dest=/etc/hosts regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="11.11.3.201 slave2"
+  - name: Configuring Key Based Login
+    shell: su - hadoop -c "ssh-copy-id -i /home/hadoop/.ssh/id_rsa.pub hadoop@master" 
+    ignore_errors: yes 
+  - shell: su - hadoop -c "ssh-copy-id -i /home/hadoop/.ssh/id_rsa.pub hadoop@slave1"
+    ignore_errors: yes 
+  - shell: su - hadoop -c "ssh-copy-id -i /home/hadoop/.ssh/id_rsa.pub hadoop@slave2"
+    ignore_errors: yes 
+  - shell: su hadoop -c "chmod 0600 /home/hadoop/.ssh/authorized_keys"
+
+  - lineinfile: dest= /etc/hostname regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="master"
+    ignore_errors: yes
+
+  - name: Delete Hadoop Folder
+    shell: rm -rf /home/hadoop/hadoop-2.6.0
+    ignore_errors: yes
+  - name: Download Hadoop
+    unarchive: src=/home/EMR/ansible/ansible-repo/hadoop-2.6.0.tar.gz dest=/home/hadoop/.
+  - shell: chown -R hadoop /home/hadoop
+
+ 
+  - name: Edit barc
+    lineinfile: dest=/home/hadoop/.bashrc regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="export HADOOP_HOME=/home/hadoop/hadoop-2.6.0"
+  - lineinfile: dest=/home/hadoop/.bashrc regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="export JAVA_HOME=/usr/java/jdk1.8.0_40"
+  - lineinfile: dest=/home/hadoop/.bashrc regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="export HADOOP_INSTALL=$HADOOP_HOME"
+  - lineinfile: dest=/home/hadoop/.bashrc regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="export HADOOP_MAPRED_HOME=$HADOOP_HOME"
+  - lineinfile: dest=/home/hadoop/.bashrc regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="export HADOOP_COMMON_HOME=$HADOOP_HOME"
+  - lineinfile: dest=/home/hadoop/.bashrc regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="export HADOOP_HDFS_HOME=$HADOOP_HOME"
+  - lineinfile: dest=/home/hadoop/.bashrc regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="export YARN_HOME=$HADOOP_HOME"
+  - lineinfile: dest=/home/hadoop/.bashrc regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="export HADOOP_COMMON_LIB_NATIVE_DIR=$HADOOP_HOME/lib/native"
+  - lineinfile: dest=/home/hadoop/.bashrc regexp="^\[\[ -s \\$HOME/\.pythonbrew" line="export PATH=$PATH:$HADOOP_HOME/sbin:$HADOOP_HOME/bin"
+
+  - name: Edit core site
+    lineinfile: dest=/home/hadoop/hadoop-2.6.0/etc/hadoop/core-site.xml regexp="^\[\[ -s \\$HOME/\.pythonbrew" insertafter="<configuration>"     line="<property><name>hadoop.tmp.dir</name><value>/app/hadoop/tmp</value></property><property><name>fs.default.name</name><value>hdfs://master:54310</value></property>"
+  - name: Edit HDFS site
+    lineinfile: dest=/home/hadoop/hadoop-2.6.0/etc/hadoop/hdfs-site.xml regexp="^\[\[ -s \\$HOME/\.pythonbrew" insertafter="<configuration>" line="<property><name>dfs.replication</name><value>2</value></property><property><name>dfs.name.dir</name><value>/home/hadoop/hadoop-2.6.0/hadoopdata/hdfs/namenode</value></property><property><name>dfs.data.dir</name><value>/home/hadoop/hadoop-2.6.0/hadoopdata/hdfs/datanode</value></property>"
+  - name: edit mapred-site.xml
+    lineinfile: dest=/home/hadoop/hadoop-2.6.0/etc/hadoop/mapred-site.xml.template regexp="^\[\[ -s \\$HOME/\.pythonbrew" insertafter="<configuration>" line="<property><name>mapred.job.tracker</name><value>master:54311</value></property>"
+  - name: Edit yarn-site.xml
+    lineinfile: dest=/home/hadoop/hadoop-2.6.0/etc/hadoop/yarn-site.xml regexp="^\[\[ -s \\$HOME/\.pythonbrew" insertafter="<configuration>" line="<property><name>yarn.nodemanager.aux-services</name><value>mapreduce_shuffle</value></property><property><name>yarn.resourcemanager.resource-tracker.address</name><value>master:8025</value></property><property><name>yarn.resourcemanager.scheduler.address</name><value>master:8030</value></property><property><name>yarn.resourcemanager.address</name><value>master:8050</value></property>"
+
+  - shell: mkdir -p /app/hadoop/tmp
+  - shell: chown -R hadoop:hadoop /app/hadoop/tmp
+  - shell: ansible-playbook /home/EMR/ansible/slavetemp.yml
+  - shell: ansible-playbook /home/EMR/ansible/run.yml
+  
+
+  

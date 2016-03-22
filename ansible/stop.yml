@@ -1,0 +1,11 @@
+---
+- hosts: webservers
+  user: root
+  sudo: yes
+  vars: 
+    hadoop_home: /home/hadoop/hadoop-2.6.0
+  tasks:
+  - shell: su - hadoop -c "stop-dfs.sh"
+    ignore_errors: yes 
+  - shell: su - hadoop -c "stop-yarn.sh"
+    ignore_errors: yes 
